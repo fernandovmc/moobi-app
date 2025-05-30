@@ -1,0 +1,115 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Icons } from "@/components/icons";
+import { toast } from "sonner";
+import { API_ENDPOINTS, authApi } from "@/lib/api";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const data = await authApi(API_ENDPOINTS.auth.login, {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+
+      // Salvar o token no localStorage
+      localStorage.setItem("token", data.session.access_token);
+      
+      toast.success("Login realizado com sucesso!", {
+        description: "Você será redirecionado para o dashboard.",
+      });
+
+      router.push("/dashboard");
+    } catch (error) {
+      toast.error("Erro ao fazer login", {
+        description: error instanceof Error ? error.message : "Tente novamente mais tarde.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <div className="container flex h-[calc(100vh-4rem-3rem)] items-center justify-center">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+        <div className="flex flex-col space-y-2 text-center">
+          <Icons.wallet className="mx-auto h-6 w-6" />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Bem-vindo de volta
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Entre com seu email e senha para acessar sua conta
+          </p>
+        </div>
+        <div className="grid gap-6">
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="nome@exemplo.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && (
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Entrar
+              </Button>
+            </div>
+          </form>
+        </div>
+        <p className="px-8 text-center text-sm text-muted-foreground">
+          Não tem uma conta?{" "}
+          <Link
+            href="/register"
+            className="underline underline-offset-4 hover:text-primary"
+          >
+            Registre-se
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
