@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { CheckIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Check } from "lucide-react";
+import Link from "next/link";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -23,78 +24,6 @@ const cardHover = {
   scale: 1.02,
   transition: { duration: 0.2 },
 };
-
-export default function PricingPage() {
-  return (
-    <motion.section
-      className="w-full space-y-6 py-8 md:py-12 lg:py-24"
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-    >
-      <motion.div
-        className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center px-2 sm:px-4"
-        variants={fadeInUp}
-      >
-        <h1 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-6xl">
-          Planos
-        </h1>
-        <p className="max-w-[85%] leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-          Escolha o plano ideal para suas necessidades
-        </p>
-      </motion.div>
-      <motion.div
-        className="mx-auto grid justify-center gap-4 grid-cols-1 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3 px-2 sm:px-0"
-        variants={staggerContainer}
-      >
-        {plans.map((plan, i) => (
-          <motion.div
-            key={plan.name}
-            className="relative overflow-hidden rounded-lg border bg-background p-2 hover:shadow-lg transition-shadow"
-            variants={fadeInUp}
-            whileHover={cardHover}
-          >
-            <div className="flex h-[500px] flex-col justify-between rounded-md p-6 items-center text-center">
-              <div className="space-y-2">
-                <h3 className="font-bold text-lg md:text-xl">{plan.name}</h3>
-                <p className="text-sm md:text-base text-muted-foreground">
-                  {plan.description}
-                </p>
-                <div className="flex items-baseline space-x-2 justify-center">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  {plan.price !== "Grátis" && (
-                    <span className="text-sm text-muted-foreground">/mês</span>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-15 w-full">
-                <ul className="space-y-2">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center space-x-2 justify-center"
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                      <span className="text-sm md:text-base">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href={plan.href} className="w-full block">
-                  <Button
-                    className="w-full"
-                    variant={plan.featured ? "default" : "outline"}
-                  >
-                    {plan.buttonText}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-    </motion.section>
-  );
-}
 
 const plans = [
   {
@@ -142,3 +71,74 @@ const plans = [
     featured: false,
   },
 ];
+
+export default function PricingPage() {
+  return (
+    <div className="min-h-[calc(100vh-12rem)] flex items-center">
+      <div className="container max-w-7xl mx-auto px-4 py-6">
+        <motion.div
+          className="flex flex-col items-center space-y-4 text-center mb-6"
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer}
+        >
+          <motion.h1
+            className="text-2xl md:text-3xl font-bold tracking-tighter"
+            variants={fadeInUp}
+          >
+            Planos que cabem no seu bolso
+          </motion.h1>
+          <motion.p
+            className="max-w-[600px] text-muted-foreground text-sm md:text-base"
+            variants={fadeInUp}
+          >
+            Escolha o plano ideal para suas necessidades e comece a organizar suas
+            finanças hoje mesmo.
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+          initial="initial"
+          animate="animate"
+          variants={staggerContainer}
+        >
+          {plans.map((plan, index) => (
+            <motion.div
+              key={index}
+              variants={fadeInUp}
+              whileHover={cardHover}
+              className="h-full"
+            >
+              <Card className={`h-full ${plan.featured ? "border-primary" : ""}`}>
+                <CardHeader>
+                  <CardTitle className="text-xl">{plan.name}</CardTitle>
+                  <CardDescription className="text-sm">{plan.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="mb-4">
+                    <span className="text-2xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground text-sm">/mês</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center text-sm">
+                        <Check className="mr-2 h-4 w-4 text-primary" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full bg-primary hover:bg-primary/90">
+                    <Link href={plan.href}>{plan.buttonText}</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
+}

@@ -1,76 +1,83 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function HomePage() {
   return (
-    <div className="flex h-[calc(100vh-4rem-3rem)] items-center justify-center bg-gradient-to-b from-background to-background/80">
-      <div className="container mx-auto grid max-w-4xl gap-4 px-4 md:grid-cols-2 md:gap-6">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col justify-center space-y-3"
-        >
-          <div className="space-y-2">
-            <motion.h1 
+    <div className="grid grid-rows-[1fr_auto] h-full">
+      {/* Hero Section */}
+      <section className="flex items-center justify-center bg-background">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col items-center space-y-8 text-center">
+            <motion.div 
+              className="flex flex-col items-center space-y-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl"
+              transition={{ duration: 0.5 }}
             >
-              Gerencie suas finanças com inteligência
-            </motion.h1>
-            <motion.p 
+              <motion.div 
+                className="flex items-center justify-center w-24 h-24 rounded-full bg-primary/10"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.2
+                }}
+              >
+                <motion.div
+                  initial={{ rotate: -180, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: 0.4
+                  }}
+                >
+                  <Icons.wallet className="h-12 w-12 text-primary" />
+                </motion.div>
+              </motion.div>
+              <motion.h1 
+                className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                Moobi
+              </motion.h1>
+              <motion.p 
+                className="max-w-[600px] text-lg text-muted-foreground"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
+                Gerencie suas finanças de forma inteligente
+              </motion.p>
+            </motion.div>
+            <motion.div 
+              className="space-x-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-sm text-muted-foreground sm:text-base"
+              transition={{ duration: 0.5, delay: 1 }}
             >
-              O Moobi é sua plataforma completa para controle financeiro, com ferramentas inteligentes e relatórios detalhados.
-            </motion.p>
-          </div>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col gap-2 sm:flex-row"
-          >
-            <Button size="lg" asChild>
-              <Link href="/register">Começar Agora</Link>
-            </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link href="/features">Conhecer Recursos</Link>
-            </Button>
-          </motion.div>
-        </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex items-center justify-center"
-        >
-          <div className="relative">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="absolute -inset-4 rounded-full bg-primary/10 blur-xl"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="relative flex h-[120px] w-[120px] items-center justify-center rounded-full bg-primary/10 sm:h-[140px] sm:w-[140px] md:h-[160px] md:w-[160px]"
-            >
-              <Icons.wallet className="h-14 w-14 text-primary sm:h-16 sm:w-16 md:h-20 md:w-20" />
+              <Link href="/auth/login?mode=register">
+                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  Começar agora
+                  <Icons.login className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/features">
+                <Button size="lg" variant="outline">
+                  Saiba mais
+                </Button>
+              </Link>
             </motion.div>
           </div>
-        </motion.div>
-      </div>
+        </div>
+      </section>
     </div>
   );
 } 
