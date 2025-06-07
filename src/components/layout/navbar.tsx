@@ -130,10 +130,10 @@ export function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild>
+                <Button variant="default" asChild>
                   <Link href="/dashboard">Dashboard</Link>
                 </Button>
-                <Button variant="ghost" onClick={handleLogout}>
+                <Button variant="destructive" onClick={handleLogout}>
                   Sair
                 </Button>
               </div>

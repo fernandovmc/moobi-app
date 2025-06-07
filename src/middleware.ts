@@ -1,16 +1,36 @@
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string) {
+          res.cookies.set({ name, value });
+        },
+        remove(name: string) {
+          res.cookies.delete(name);
+        },
+      },
+    }
+  );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // Use getUser para garantir autenticação real
+  const { data: { user } } = await supabase.auth.getUser();
 
-  const isAuth = !!session;
+  // Debug session state
+  console.log('Middleware - Session:', !!user);
+  console.log('Middleware - Path:', req.nextUrl.pathname);
+
+  const isAuth = !!user;
   const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
   const isMarketingPage = !isAuthPage && !isDashboardPage;

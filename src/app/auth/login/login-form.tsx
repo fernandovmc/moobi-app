@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import { toast } from "sonner";
-import { API_ENDPOINTS, authApi } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -18,7 +17,6 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { createBrowserClient } from "@supabase/ssr";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -30,9 +28,8 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
-  const { login } = useAuth();
 
-  const supabaseBrowser = createBrowserClient(
+  const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
@@ -51,26 +48,35 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const endpoint = isRegister ? API_ENDPOINTS.auth.register : API_ENDPOINTS.auth.login;
-      const payload = isRegister 
-        ? formData 
-        : { email: formData.email, password: formData.password };
-      
-      const data = await authApi(endpoint, {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      if (isRegister) {
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              name: formData.name,
+            },
+          },
+        });
 
-      if (data.session?.access_token) {
-        login(data.session.access_token);
-        
-        toast.success(isRegister ? "Conta criada com sucesso!" : "Login realizado com sucesso!", {
+        if (error) throw error;
+
+        toast.success("Conta criada com sucesso!", {
+          description: "Verifique seu email para confirmar a conta.",
+        });
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (error) throw error;
+
+        toast.success("Login realizado com sucesso!", {
           description: "Você será redirecionado para o dashboard.",
         });
         
         router.replace("/dashboard");
-      } else {
-        throw new Error("Token de acesso não encontrado na resposta");
       }
     } catch (error) {
       console.error("Erro no login:", error);
@@ -84,7 +90,7 @@ export default function LoginForm() {
 
   const handleSocialLogin = async (provider: 'google' | 'linkedin') => {
     try {
-      const { error } = await supabaseBrowser.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
@@ -255,7 +261,7 @@ export default function LoginForm() {
                           id="email"
                           name="email"
                           type="email"
-                          placeholder="nome@exemplo.com"
+                          placeholder="seu@email.com"
                           value={formData.email}
                           onChange={handleChange}
                           required
@@ -268,13 +274,18 @@ export default function LoginForm() {
                           id="password"
                           name="password"
                           type="password"
+                          placeholder="••••••••"
                           value={formData.password}
                           onChange={handleChange}
                           required
                           className="h-11"
                         />
                       </div>
-                      <Button type="submit" disabled={isLoading} className="h-11 mt-auto">
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full h-11"
+                      >
                         {isLoading && (
                           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                         )}
