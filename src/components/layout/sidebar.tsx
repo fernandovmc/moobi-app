@@ -56,50 +56,50 @@ export function Sidebar() {
   const { signOut } = useAuth();
 
   return (
-    <div className="flex h-full w-[240px] flex-col border-r bg-background">
-      <div className="flex h-14 items-center border-b px-4">
+    <div className="flex h-full w-25 flex-col border-r bg-background items-center">
+      <div className="flex h-14 items-center border-b w-full justify-center">
         <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
+          href="/"
+          className="flex flex-col items-center gap-1 font-semibold"
         >
           <Wallet className="h-6 w-6" />
-          <span>Moobi</span>
+          <span className="text-xs">Moobi</span>
         </Link>
       </div>
-      <ScrollArea className="flex-1 px-2 py-4">
-        <nav className="grid gap-1">
+      <ScrollArea className="flex-1 py-4 w-full">
+        <nav className="flex flex-col items-center gap-4">
           {navigation.map((item) => (
             <Button
               key={item.href}
               variant={pathname === item.href ? "secondary" : "ghost"}
               className={cn(
-                "justify-start gap-2",
+                "flex flex-col items-center gap-1 w-16 h-16 justify-center p-0",
                 pathname === item.href && "bg-muted"
               )}
               asChild
             >
-              <Link href={item.href}>
-                <item.icon className="h-4 w-4" />
-                {item.name}
+              <Link href={item.href} className="flex flex-col items-center">
+                <item.icon className="h-6 w-6" />
+                <span className="text-xs mt-1">{item.name}</span>
               </Link>
             </Button>
           ))}
         </nav>
         <Separator className="my-4" />
-        <nav className="grid gap-1">
-          <Button variant="ghost" className="justify-start gap-2" asChild>
-            <Link href="/dashboard/settings">
-              <Settings className="h-4 w-4" />
-              Configurações
+        <nav className="flex flex-col items-center gap-4">
+          <Button variant="ghost" className="flex flex-col items-center gap-1 w-16 h-16 justify-center p-0" asChild>
+            <Link href="/dashboard/settings" className="flex flex-col items-center">
+              <Settings className="h-6 w-6" />
+              <span className="text-xs mt-1">Configurações</span>
             </Link>
           </Button>
           <Button
             variant="ghost"
-            className="justify-start gap-2 text-destructive hover:text-destructive"
+            className="flex flex-col items-center gap-1 w-16 h-16 justify-center p-0 text-destructive hover:text-destructive"
             onClick={signOut}
           >
-            <LogOut className="h-4 w-4" />
-            Sair
+            <LogOut className="h-6 w-6" />
+            <span className="text-xs mt-1">Sair</span>
           </Button>
         </nav>
       </ScrollArea>

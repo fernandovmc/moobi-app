@@ -23,17 +23,16 @@ export async function middleware(req: NextRequest) {
     }
   );
 
-  // Use getUser para garantir autenticação real
   const { data: { user } } = await supabase.auth.getUser();
-
-  // Debug session state
-  console.log('Middleware - Session:', !!user);
-  console.log('Middleware - Path:', req.nextUrl.pathname);
-
   const isAuth = !!user;
   const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
   const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
-  const isMarketingPage = !isAuthPage && !isDashboardPage;
+  const isCallbackPage = req.nextUrl.pathname === "/auth/callback";
+
+  // Allow callback page to handle auth
+  if (isCallbackPage) {
+    return res;
+  }
 
   // If user is authenticated
   if (isAuth) {
@@ -48,12 +47,14 @@ export async function middleware(req: NextRequest) {
   // If user is not authenticated
   if (!isAuth) {
     // Allow access to marketing pages and auth pages
-    if (isMarketingPage || isAuthPage) {
+    if (!isDashboardPage) {
       return res;
     }
     // Redirect from dashboard to login
     if (isDashboardPage) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      const redirectUrl = new URL("/auth/login", req.url);
+      redirectUrl.searchParams.set("next", req.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

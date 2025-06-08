@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const next = requestUrl.searchParams.get("next") || "/dashboard";
 
   if (code) {
     const cookieStore = await cookies();
@@ -35,21 +36,27 @@ export async function GET(request: Request) {
       }
     );
 
-    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (error) {
+    try {
+      const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code);
+      
+      if (error) {
+        console.error('Auth callback error:', error);
+        return NextResponse.redirect(new URL("/auth/login", request.url));
+      }
+
+      if (session) {
+        // Validate the next URL to prevent open redirects
+        const allowedPaths = ['/dashboard', '/'];
+        const redirectPath = allowedPaths.includes(next) ? next : '/dashboard';
+        
+        return NextResponse.redirect(new URL(redirectPath, request.url));
+      }
+    } catch (error) {
       console.error('Auth callback error:', error);
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
-
-    if (session) {
-      console.log('Auth callback - Session set successfully');
-      // Redirect to the original destination or dashboard
-      const redirectTo = requestUrl.searchParams.get('redirectTo') || '/dashboard';
-      return NextResponse.redirect(new URL(redirectTo, request.url));
-    }
   }
 
-  console.log('Auth callback - No code or session');
+  // If no code is present, redirect to login
   return NextResponse.redirect(new URL("/auth/login", request.url));
 } 

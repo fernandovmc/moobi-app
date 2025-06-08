@@ -15,8 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { createBrowserClient } from "@supabase/ssr";
-import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
+import { motion } from "framer-motion";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -28,11 +28,6 @@ export default function LoginForm() {
     email: "",
     password: "",
   });
-
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -48,6 +43,8 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
+      const supabase = createClient();
+
       if (isRegister) {
         const { error } = await supabase.auth.signUp({
           email: formData.email,
@@ -90,6 +87,7 @@ export default function LoginForm() {
 
   const handleSocialLogin = async (provider: 'google' | 'linkedin') => {
     try {
+      const supabase = createClient();
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -198,101 +196,92 @@ export default function LoginForm() {
                   </CardDescription>
                 </div>
               </CardHeader>
-              <CardContent className="p-0 pt-6 flex-1 flex flex-col">
-                <div className="grid gap-6 flex-1">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleSocialLogin('google')}
-                      disabled={isLoading}
-                      className="w-full bg-[#B31412] hover:bg-[#8B0000] text-white hover:text-white border-transparent dark:bg-[#B31412] dark:hover:bg-[#8B0000]"
-                    >
-                      <Icons.google className="mr-2 h-5 w-5" />
-                      Continuar com Google
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleSocialLogin('linkedin')}
-                      disabled={isLoading}
-                      className="w-full bg-[#005B8C] hover:bg-[#004B73] text-white hover:text-white border-transparent dark:bg-[#005B8C] dark:hover:bg-[#004B73]"
-                    >
-                      <Icons.linkedin className="mr-2 h-5 w-5" />
-                      Continuar com LinkedIn
-                    </Button>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <Separator />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Ou continue com
-                      </span>
-                    </div>
-                  </div>
-                  <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-                    <div className="grid gap-4 flex-1">
-                      <AnimatePresence mode="wait">
-                        {isRegister && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="grid gap-2"
-                          >
-                            <Label htmlFor="name">Nome</Label>
-                            <Input
-                              id="name"
-                              name="name"
-                              type="text"
-                              placeholder="Seu nome completo"
-                              value={formData.name}
-                              onChange={handleChange}
-                              required
-                              className="h-11"
-                            />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                      <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          placeholder="seu@email.com"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
-                          className="h-11"
-                        />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="password">Senha</Label>
-                        <Input
-                          id="password"
-                          name="password"
-                          type="password"
-                          placeholder="••••••••"
-                          value={formData.password}
-                          onChange={handleChange}
-                          required
-                          className="h-11"
-                        />
-                      </div>
-                      <Button
-                        type="submit"
+
+              <CardContent className="p-0 mt-8">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {isRegister && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Seu nome completo"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
                         disabled={isLoading}
-                        className="w-full h-11"
-                      >
-                        {isLoading && (
-                          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                        )}
-                        {isRegister ? "Criar conta" : "Entrar"}
-                      </Button>
+                      />
                     </div>
-                  </form>
+                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading && (
+                      <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    {isRegister ? "Criar conta" : "Entrar"}
+                  </Button>
+                </form>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Ou continue com
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => handleSocialLogin("google")}
+                  >
+                    <Icons.google className="mr-2 h-4 w-4" />
+                    Google
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => handleSocialLogin("linkedin")}
+                  >
+                    <Icons.linkedin className="mr-2 h-4 w-4" />
+                    LinkedIn
+                  </Button>
                 </div>
               </CardContent>
             </motion.div>
